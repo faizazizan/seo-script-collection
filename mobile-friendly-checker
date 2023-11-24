@@ -1,0 +1,51 @@
+##Mobile Friendly Checker
+
+import requests
+
+def check_mobile_friendly(api_key, url):
+    base_url = "https://searchconsole.googleapis.com/v1/urlTestingTools/mobileFriendlyTest:run"
+
+    params = {
+        'key': api_key,
+    }
+
+    payload = {
+        'url': url,
+    }
+
+    try:
+        response = requests.post(base_url, params=params, json=payload)
+        response.raise_for_status()
+        result = response.json()
+
+        if 'testStatus' in result and 'status' in result['testStatus'] and result['testStatus']['status'] == 'COMPLETE':
+            mobile_friendly = result['mobileFriendliness']
+            print(f"{url} is {'mobile-friendly' if mobile_friendly == 'MOBILE_FRIENDLY' else 'not mobile-friendly'}")
+
+        else:
+            print(f"Error in checking mobile-friendliness for {url}")
+
+    except requests.exceptions.HTTPError as errh:
+        print(f"HTTP Error: {errh}")
+    except requests.exceptions.ConnectionError as errc:
+        print(f"Error Connecting: {errc}")
+    except requests.exceptions.Timeout as errt:
+        print(f"Timeout Error: {errt}")
+    except requests.exceptions.RequestException as err:
+        print(f"An error occurred: {err}")
+
+if __name__ == "__main__":
+    # Replace 'YOUR_API_KEY' with your Google Cloud API key
+    google_api_key = 'YOUR_API_KEY'
+
+    # Specify a list of URLs to check for mobile-friendliness
+    urls_to_check = [
+        'https://faizazizan.com/page1',
+        'https://faizazizan.com/page2',
+        # Add more URLs as needed
+    ]
+
+    # Check mobile-friendliness for the specified URLs
+    for url in urls_to_check:
+        check_mobile_friendly(google_api_key, url)
+
