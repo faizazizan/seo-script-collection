@@ -1,0 +1,24 @@
+##Sitemap Analysis
+
+import xml.etree.ElementTree as ET
+
+# Replace 'teratotech.com/sitemap.xml' with the actual URL of the sitemap XML
+sitemap_url = 'https://faizazizan.com/sitemap.xml'
+
+try:
+    import requests
+    response = requests.get(sitemap_url)
+    if response.status_code == 200:
+        # Parse the XML content
+        tree = ET.ElementTree(ET.fromstring(response.content))
+        root = tree.getroot()
+
+        # Extract and print the URLs from the sitemap
+        for url in root.findall('.//{http://www.sitemaps.org/schemas/sitemap/0.9}loc'):
+            print(url.text)
+    else:
+        print(f"Failed to fetch sitemap. Status code: {response.status_code}")
+except requests.exceptions.RequestException as e:
+    print(f"Error: {e}")
+except ET.ParseError as e:
+    print(f"Error parsing XML: {e}")
