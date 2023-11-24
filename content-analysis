@@ -1,0 +1,75 @@
+##Content Analysis
+
+import spacy
+from textblob import TextBlob
+
+def analyze_content(text):
+    """Analyze content for readability, relevance, and sentiment."""
+    # Load spaCy model
+    nlp = spacy.load("en_core_web_sm")
+
+    # Process the text using spaCy
+    doc = nlp(text)
+
+    # Extract key phrases (noun chunks)
+    key_phrases = [chunk.text for chunk in doc.noun_chunks]
+
+    # Calculate Flesch Reading Ease score
+    flesch_reading_ease = calculate_flesch_reading_ease(text)
+
+    # Perform sentiment analysis using TextBlob
+    sentiment_blob = TextBlob(text)
+    sentiment_polarity = sentiment_blob.sentiment.polarity
+
+    return {
+        "key_phrases": key_phrases,
+        "flesch_reading_ease": flesch_reading_ease,
+        "sentiment_polarity": sentiment_polarity,
+    }
+
+def calculate_flesch_reading_ease(text):
+    """Calculate Flesch Reading Ease score."""
+    # Formula: 206.835 - 1.015 * (total words / total sentences) - 84.6 * (total syllables / total words)
+    words = text.split()
+    total_words = len(words)
+    total_sentences = text.count('.') + text.count('!') + text.count('?')
+
+    syllables = sum([syllable_count(word) for word in words])
+
+    flesch_reading_ease = 206.835 - 1.015 * (total_words / total_sentences) - 84.6 * (syllables / total_words)
+
+    return flesch_reading_ease
+
+def syllable_count(word):
+    """Count syllables in a word."""
+    count = 0
+    vowels = "aeiouy"
+
+    if word[0] in vowels:
+        count += 1
+
+    for index in range(1, len(word)):
+        if word[index] in vowels and word[index - 1] not in vowels:
+            count += 1
+
+    if count == 0:
+        count += 1
+
+    return count
+
+if __name__ == "__main__":
+    # Example content to analyze
+    content_to_analyze = """
+        Natural language processing (NLP) is a field of artificial intelligence that focuses on the interaction
+        between computers and humans using natural language. It involves the ability of a computer to understand,
+        interpret, and generate human-like text. NLP can be used for various applications, including language
+        translation, sentiment analysis, and chatbot development.
+    """
+
+    # Analyze the content
+    analysis_result = analyze_content(content_to_analyze)
+
+    # Print the analysis result
+    print("Key Phrases:", analysis_result["key_phrases"])
+    print("Flesch Reading Ease:", analysis_result["flesch_reading_ease"])
+    print("Sentiment Polarity:", analysis_result["sentiment_polarity"])
