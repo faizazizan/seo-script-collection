@@ -1,0 +1,36 @@
+##Page Speed Analysis
+
+import requests
+import time
+
+def measure_page_speed(url):
+    try:
+        start_time = time.time()
+        response = requests.get(url)
+        response.raise_for_status()
+        end_time = time.time()
+
+        load_time = end_time - start_time
+        return load_time
+
+    except requests.exceptions.HTTPError as errh:
+        print(f"HTTP Error: {errh}")
+    except requests.exceptions.ConnectionError as errc:
+        print(f"Error Connecting: {errc}")
+    except requests.exceptions.Timeout as errt:
+        print(f"Timeout Error: {errt}")
+    except requests.exceptions.RequestException as err:
+        print(f"An error occurred: {err}")
+    return None
+
+if __name__ == "__main__":
+    # Specify the URL for page speed analysis
+    url_to_analyze = 'https://faizazizan.com'
+
+    # Measure page speed
+    load_time = measure_page_speed(url_to_analyze)
+
+    if load_time:
+        print(f"Page Load Time for {url_to_analyze}: {load_time:.2f} seconds")
+    else:
+        print("Failed to measure page speed.")
