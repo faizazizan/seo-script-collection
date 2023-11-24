@@ -1,0 +1,64 @@
+##Check Duplicate 
+
+import requests
+from bs4 import BeautifulSoup
+import hashlib
+
+def calculate_hash(content):
+    """Calculate the hash of a content."""
+    hasher = hashlib.sha1()
+    hasher.update(content.encode('utf-8'))
+    return hasher.hexdigest()
+
+def fetch_html_content(url):
+    """Fetch HTML content from a URL."""
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.text
+    except requests.exceptions.HTTPError as errh:
+        print(f"HTTP Error: {errh}")
+    except requests.exceptions.ConnectionError as errc:
+        print(f"Error Connecting: {errc}")
+    except requests.exceptions.Timeout as errt:
+        print(f"Timeout Error: {errt}")
+    except requests.exceptions.RequestException as err:
+        print(f"An error occurred: {err}")
+    return None
+
+def find_duplicate_content(urls):
+    """Find duplicate content among a list of URLs."""
+    hash_dict = {}
+    duplicates = []
+
+    for url in urls:
+        content = fetch_html_content(url)
+        
+        if content is not None:
+            content_hash = calculate_hash(content)
+
+            if content_hash in hash_dict:
+                duplicates.append((url, hash_dict[content_hash]))
+            else:
+                hash_dict[content_hash] = url
+
+    return duplicates
+
+if __name__ == "__main__":
+    # Specify a list of URLs to check for duplicate content
+    urls_to_check = [
+        'https://faizazizan.com/page1',
+        'https://faizazizan.com/page2',
+        # Add more URLs as needed
+    ]
+
+    # Find duplicate content among the specified URLs
+    duplicate_content = find_duplicate_content(urls_to_check)
+
+    # Print the duplicate content
+    if duplicate_content:
+        print("Duplicate Content found:")
+        for content1, content2 in duplicate_content:
+            print(f"{content1} and {content2}")
+    else:
+        print("No duplicate content found.")
