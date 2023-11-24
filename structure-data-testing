@@ -1,0 +1,63 @@
+##Structure Data Testing
+
+import requests
+
+def test_structured_data(api_key, url):
+    base_url = "https://searchconsole.googleapis.com/v1/transform"
+
+    params = {
+        'key': api_key,
+    }
+
+    payload = {
+        'url': url,
+        'requestScreenshot': True,  # Set to False if you don't need screenshots
+    }
+
+    try:
+        response = requests.post(base_url, params=params, json=payload)
+        response.raise_for_status()
+        result = response.json()
+
+        if 'testStatus' in result and 'status' in result['testStatus'] and result['testStatus']['status'] == 'COMPLETE':
+            print(f"{url} structured data test completed successfully")
+            
+            # Retrieve structured data test results
+            if 'screenshot' in result:
+                screenshot_data = result['screenshot']['data']
+                # Process or save the screenshot data as needed
+
+            if 'resources' in result:
+                for resource in result['resources']:
+                    print(f"Resource: {resource['url']}, Status: {resource['status']}")
+                    if 'warnings' in resource:
+                        print("Warnings:")
+                        for warning in resource['warnings']:
+                            print(f"- {warning}")
+
+        else:
+            print(f"Error in testing structured data for {url}")
+
+    except requests.exceptions.HTTPError as errh:
+        print(f"HTTP Error: {errh}")
+    except requests.exceptions.ConnectionError as errc:
+        print(f"Error Connecting: {errc}")
+    except requests.exceptions.Timeout as errt:
+        print(f"Timeout Error: {errt}")
+    except requests.exceptions.RequestException as err:
+        print(f"An error occurred: {err}")
+
+if __name__ == "__main__":
+    # Replace 'YOUR_API_KEY' with your Google Cloud API key
+    google_api_key = 'YOUR_API_KEY'
+
+    # Specify a list of URLs to test structured data
+    urls_to_test = [
+        'https://faizazizan.com/page1',
+        'https://faizazizan.com/page2',
+        # Add more URLs as needed
+    ]
+
+    # Test structured data for the specified URLs
+    for url in urls_to_test:
+        test_structured_data(google_api_key, url)
