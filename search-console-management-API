@@ -1,0 +1,71 @@
+##Check Performance Google Search 
+
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+import datetime
+
+# Set up the API scopes and credentials file path
+SCOPES = ['https://www.googleapis.com/auth/webmasters.readonly']
+CLIENT_SECRETS_FILE = 'client_secret.json'  # Replace with your client secrets file
+
+def get_search_console_service():
+    """Authenticate and get Search Console service."""
+    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
+    credentials = flow.run_local_server(port=0)
+
+    service = build('webmasters', 'v3', credentials=credentials)
+    return service
+
+def get_crawl_errors(site_url):
+    """Get crawl errors from Google Search Console API."""
+    service = get_search_console_service()
+
+    try:
+        errors_data = service.urlcrawlerrorscounts().query(siteUrl=site_url).execute()
+        return errors_data
+
+    except Exception as e:
+        print(f"Error fetching crawl errors: {e}")
+        return None
+
+def get_search_performance(site_url, start_date, end_date):
+    """Get search performance data from Google Search Console API."""
+    service = get_search_console_service()
+
+    try:
+        performance_data = service.searchanalytics().query(
+            siteUrl=site_url,
+            startDate=start_date,
+            endDate=end_date,
+            dimensions=['query', 'page', 'date']
+        ).execute()
+        return performance_data
+
+    except Exception as e:
+        print(f"Error fetching search performance data: {e}")
+        return None
+
+if __name__ == "__main__":
+    # Replace 'YOUR_SITE_URL' with your site's URL
+    site_url = 'https://example.com'
+
+    # Set the start and end dates for search performance data
+    start_date = (datetime.datetime.now() - datetime.timedelta(days=30)).strftime('%Y-%m-%d')
+    end_date = datetime.datetime.now().strftime('%Y-%m-%d')
+
+    # Fetch and print crawl errors
+    crawl_errors_data = get_crawl_errors(site_url)
+    if crawl_errors_data:
+        print("Crawl Errors:")
+        print(crawl_errors_data)
+    else:
+        print("Failed to fetch crawl errors.")
+
+    # Fetch and print search performance data
+    search_performance_data = get_search_performance(site_url, start_date, end_date)
+    if search_performance_data:
+        print("Search Performance Data:")
+        print(search_performance_data)
+    else:
+        print("Failed to fetch search performance data.")
