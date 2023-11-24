@@ -1,0 +1,52 @@
+##Analyze log files
+
+import re
+from collections import defaultdict
+
+def analyze_log_files(log_file_paths):
+    """Analyze log files to understand search engine bot interactions."""
+    bot_interactions = defaultdict(int)
+
+    for log_file_path in log_file_paths:
+        with open(log_file_path, 'r') as log_file:
+            for line in log_file:
+                log_entry = parse_log_entry(line)
+
+                if is_bot(log_entry['user_agent']):
+                    bot_interactions[log_entry['ip']] += 1
+
+    print("Bot Interactions:")
+    for ip, count in bot_interactions.items():
+        print(f"IP: {ip}, Count: {count}")
+
+def parse_log_entry(log_line):
+    """Parse a log entry into a dictionary."""
+    # Modify the regex pattern based on your log format
+    log_pattern = r'(?P<ip>[\d\.]+) - - \[.*\] "(?P<request>.*?)" \d+ \d+ "(?P<referrer>.*?)" "(?P<user_agent>.*?)"'
+    match = re.match(log_pattern, log_line)
+
+    if match:
+        return match.groupdict()
+    else:
+        return {}
+
+def is_bot(user_agent):
+    """Check if the user agent belongs to a search engine bot."""
+    # Add or modify patterns based on your specific use case
+    bot_patterns = [
+        'bot',
+        'crawl',
+        'spider',
+    ]
+
+    for pattern in bot_patterns:
+        if re.search(pattern, user_agent, re.IGNORECASE):
+            return True
+
+    return False
+
+if __name__ == "__main__":
+    # Replace 'log_file_paths' with the paths to your log files
+    log_file_paths = ['path/to/access.log']
+
+    analyze_log_files(log_file_paths)
