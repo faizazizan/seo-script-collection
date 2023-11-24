@@ -1,0 +1,44 @@
+##HTA Access
+
+import re
+
+def analyze_htaccess_file(file_path):
+    """Analyze the .htaccess file for configuration issues, redirects, and security measures."""
+    try:
+        with open(file_path, 'r') as htaccess_file:
+            htaccess_content = htaccess_file.read()
+
+            # Check for redirects
+            redirects = find_redirects(htaccess_content)
+            print("Redirects:")
+            for redirect in redirects:
+                print(f"  - {redirect}")
+
+            # Check for security measures
+            security_headers = find_security_headers(htaccess_content)
+            print("\nSecurity Headers:")
+            for header in security_headers:
+                print(f"  - {header}")
+
+    except FileNotFoundError:
+        print(f"The .htaccess file at '{file_path}' not found.")
+    except Exception as e:
+        print(f"Error analyzing .htaccess file: {e}")
+
+def find_redirects(content):
+    """Find redirects in the .htaccess content."""
+    redirect_pattern = re.compile(r'Redirect\s+\d+\s+(\/\S+)')
+    redirects = redirect_pattern.findall(content)
+    return redirects
+
+def find_security_headers(content):
+    """Find security-related headers in the .htaccess content."""
+    security_header_pattern = re.compile(r'Header\s+(set|always)\s+(.*?)\s*$', re.MULTILINE)
+    security_headers = security_header_pattern.findall(content)
+    return [header[1] for header in security_headers]
+
+if __name__ == "__main__":
+    # Replace 'path/to/.htaccess' with the actual path to your .htaccess file
+    htaccess_path = 'path/to/.htaccess'
+
+    analyze_htaccess_file(htaccess_path)
