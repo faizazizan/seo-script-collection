@@ -1,0 +1,62 @@
+
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+
+def check_robots_txt(url):
+    """Check if robots.txt is accessible."""
+    robots_url = urljoin(url, '/robots.txt')
+    response = requests.get(robots_url)
+
+    if response.status_code == 200:
+        print(f"Robots.txt is accessible: {robots_url}")
+    else:
+        print(f"Robots.txt is not accessible or doesn't exist.")
+
+def check_sitemap(url):
+    """Check if a sitemap is specified in robots.txt."""
+    robots_url = urljoin(url, '/robots.txt')
+    response = requests.get(robots_url)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        sitemap_tag = soup.find('meta', {'name': 'sitemap'})
+
+        if sitemap_tag and 'content' in sitemap_tag.attrs:
+            print(f"Sitemap specified in robots.txt: {sitemap_tag['content']}")
+        else:
+            print("No sitemap specified in robots.txt.")
+    else:
+        print("Failed to fetch robots.txt for sitemap check.")
+
+def analyze_on_page_factors(url):
+    """Analyze on-page SEO factors."""
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Example: Check title tag
+        title_tag = soup.find('title')
+        if title_tag:
+            print(f"Title Tag: {title_tag.text}")
+        else:
+            print("Title tag not found.")
+
+        # Add more checks for meta descriptions, header tags, etc.
+
+    else:
+        print(f"Failed to fetch {url} for on-page analysis.")
+
+if __name__ == "__main__":
+    # Replace 'https://faizazizan.com' with the URL you want to analyze
+    website_url = 'https://faizazizan.com'
+
+    # Check robots.txt accessibility
+    check_robots_txt(website_url)
+
+    # Check sitemap specified in robots.txt
+    check_sitemap(website_url)
+
+    # Analyze on-page SEO factors
+    analyze_on_page_factors(website_url)
