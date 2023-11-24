@@ -1,0 +1,50 @@
+##Check Header
+
+import requests
+
+def analyze_server_headers(url):
+    """Check server response headers for issues."""
+    try:
+        response = requests.head(url, allow_redirects=True)
+
+        print("Server Headers Analysis:")
+        print(f"URL: {url}")
+        print(f"Status Code: {response.status_code}")
+
+        # Check for redirects
+        if response.history:
+            print("Redirects:")
+            for redirect in response.history:
+                print(f"  - {redirect.url}")
+
+        # Check for caching headers
+        cache_headers = response.headers.get("cache-control", "")
+        if "no-cache" in cache_headers or "no-store" in cache_headers:
+            print("Caching Headers:")
+            print("  - Caching may be disabled.")
+
+        # Check for security headers
+        security_headers = [
+            "strict-transport-security",
+            "content-security-policy",
+            "x-content-type-options",
+            "x-frame-options",
+            "x-xss-protection",
+        ]
+
+        print("Security Headers:")
+        for header in security_headers:
+            value = response.headers.get(header, "")
+            if not value:
+                print(f"  - {header} header is missing.")
+            else:
+                print(f"  - {header}: {value}")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error analyzing server headers: {e}")
+
+if __name__ == "__main__":
+    # Replace 'https://example.com' with the actual URL you want to analyze
+    url_to_analyze = 'https://faizazizan.com'
+
+    analyze_server_headers(url_to_analyze)
