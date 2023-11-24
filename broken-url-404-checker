@@ -1,0 +1,57 @@
+##Check 404 URL 
+
+import requests
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def check_for_404_errors(website_url):
+    """Check for 404 errors on a website."""
+    try:
+        response = requests.get(website_url)
+        response.raise_for_status()
+
+        if response.status_code == 404:
+            return True
+        else:
+            return False
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error checking for 404 errors: {e}")
+        return False
+
+def send_notification(email_to, email_subject, email_body):
+    """Send email notification."""
+    email_from = 'your_email@gmail.com'  # Replace with your email
+    email_password = 'your_email_password'  # Replace with your email password
+
+    msg = MIMEMultipart()
+    msg['From'] = email_from
+    msg['To'] = email_to
+    msg['Subject'] = email_subject
+
+    body = MIMEText(email_body)
+    msg.attach(body)
+
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(email_from, email_password)
+            server.sendmail(email_from, email_to, msg.as_string())
+        print("Notification email sent successfully.")
+    except Exception as e:
+        print(f"Error sending notification email: {e}")
+
+if __name__ == "__main__":
+    # Replace with the actual URL of your website
+    website_url_to_check = 'https://example.com'
+
+    # Replace with the actual email information
+    recipient_email = 'recipient@example.com'
+    email_subject = '404 Error Notification'
+
+    if check_for_404_errors(website_url_to_check):
+        notification_body = f"404 errors detected on {website_url_to_check}. Please check and resolve."
+        send_notification(recipient_email, email_subject, notification_body)
+    else:
+        print(f"No 404 errors detected on {website_url_to_check}.")
