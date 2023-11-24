@@ -1,0 +1,41 @@
+##XML Sitemap Generation
+
+import os
+import datetime
+import xml.etree.ElementTree as ET
+
+def generate_sitemap(root_url, output_file="sitemap.xml"):
+    root = ET.Element("urlset", xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
+
+    # Add URLs to the sitemap (you may need to adapt this based on your website structure)
+    urls = [
+        {"loc": root_url, "lastmod": "2023-01-01", "changefreq": "daily", "priority": "1.0"},
+        # Add more URLs as needed
+    ]
+
+    for url_data in urls:
+        url_element = ET.SubElement(root, "url")
+        loc_element = ET.SubElement(url_element, "loc")
+        loc_element.text = url_data["loc"]
+
+        lastmod_element = ET.SubElement(url_element, "lastmod")
+        lastmod_element.text = url_data.get("lastmod", datetime.datetime.now().isoformat())
+
+        changefreq_element = ET.SubElement(url_element, "changefreq")
+        changefreq_element.text = url_data.get("changefreq", "weekly")
+
+        priority_element = ET.SubElement(url_element, "priority")
+        priority_element.text = url_data.get("priority", "0.5")
+
+    tree = ET.ElementTree(root)
+    tree.write(output_file, encoding="utf-8", xml_declaration=True)
+
+if __name__ == "__main__":
+    # Replace 'https://faizazizan.com' with your website's root URL
+    root_url = 'https://faizazizan.com'
+
+    # Specify the output file name
+    output_file = 'sitemap.xml'
+
+    generate_sitemap(root_url, output_file)
+    print(f"Sitemap generated and saved to {output_file}.")
