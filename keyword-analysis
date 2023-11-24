@@ -1,0 +1,75 @@
+##Keyword Analysis
+
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.probability import FreqDist
+from nltk.corpus import stopwords
+from nltk.tag import pos_tag
+import requests
+from bs4 import BeautifulSoup
+
+# Download the required NLTK resource
+nltk.download('averaged_perceptron_tagger')
+nltk.download('punkt')
+nltk.download('stopwords')
+
+def get_html(url):
+    """Retrieve HTML content from a given URL."""
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.text
+    except requests.exceptions.HTTPError as errh:
+        print(f"HTTP Error: {errh}")
+    except requests.exceptions.ConnectionError as errc:
+        print(f"Error Connecting: {errc}")
+    except requests.exceptions.Timeout as errt:
+        print(f"Timeout Error: {errt}")
+    except requests.exceptions.RequestException as err:
+        print(f"An error occurred: {err}")
+    return None
+
+def get_keywords_from_url(url, num_keywords=5):
+    """Extract keywords from the content of a webpage."""
+    html_content = get_html(url)
+
+    if html_content:
+        # Use BeautifulSoup to extract text from HTML
+        soup = BeautifulSoup(html_content, 'html.parser')
+        text = soup.get_text()
+
+        # Tokenize the text into words
+        words = word_tokenize(text)
+
+        # Remove stop words
+        stop_words = set(stopwords.words('english'))
+        filtered_words = [word.lower() for word in words if word.isalnum() and word.lower() not in stop_words]
+
+        # Part-of-speech tagging
+        tagged_words = pos_tag(filtered_words)
+
+        # Extract nouns and adjectives as potential keywords
+        keywords = [word for word, pos in tagged_words if pos.startswith('NN') or pos.startswith('JJ')]
+
+        # Calculate keyword frequency
+        freq_dist = FreqDist(keywords)
+
+        # Get the most common keywords
+        top_keywords = freq_dist.most_common(num_keywords)
+
+        return top_keywords
+    else:
+        print(f"Failed to retrieve HTML content for {url}.")
+        return None
+
+if __name__ == "__main__":
+    # Specify the URL of the webpage to analyze
+    webpage_url = "https://example.com"  # Replace with your desired URL
+
+    # Extract and print the top keywords from the URL
+    top_keywords = get_keywords_from_url(webpage_url, num_keywords=5)
+
+    if top_keywords:
+        print("Top Keywords:")
+        for keyword, frequency in top_keywords:
+            print(f"{keyword}: {frequency}")
