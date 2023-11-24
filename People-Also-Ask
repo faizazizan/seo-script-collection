@@ -1,0 +1,12 @@
+##People Also Ask
+
+import requests
+import people_also_ask
+
+# Define the URL for your request
+url = 'https://www.google.com/search?q=app+developer&gl=us'
+
+
+# Use the people_also_ask library to get related questions
+
+related_questions = people_also_ask.get_related_questions("app developer", 15)
