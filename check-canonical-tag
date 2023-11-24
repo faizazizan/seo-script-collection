@@ -1,0 +1,44 @@
+##Canonical Tag
+
+import requests
+from bs4 import BeautifulSoup
+
+def get_canonical_tag(url):
+    """Get canonical tag from a webpage."""
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+        canonical_tag = soup.find('link', {'rel': 'canonical'})
+
+        return canonical_tag['href'] if canonical_tag else None
+
+    except requests.exceptions.HTTPError as errh:
+        print(f"{url} - HTTP Error: {errh}")
+    except requests.exceptions.ConnectionError as errc:
+        print(f"{url} - Error Connecting: {errc}")
+    except requests.exceptions.Timeout as errt:
+        print(f"{url} - Timeout Error: {errt}")
+    except requests.exceptions.RequestException as err:
+        print(f"{url} - An error occurred: {err}")
+
+def analyze_canonical_tags(urls):
+    """Analyze canonical tags for a list of URLs."""
+    for url in urls:
+        canonical_url = get_canonical_tag(url)
+        if canonical_url:
+            print(f"{url} - Canonical URL: {canonical_url}")
+        else:
+            print(f"{url} - No canonical tag found.")
+
+if __name__ == "__main__":
+    # Specify a list of URLs to analyze
+    urls_to_analyze = [
+        'https://teratotech.com',
+        'http://teratotech.com',
+        # Add more URLs as needed
+    ]
+
+    # Analyze canonical tags for the specified URLs
+    analyze_canonical_tags(urls_to_analyze)
