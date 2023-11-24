@@ -1,0 +1,47 @@
+##Check AMP
+
+import requests
+
+def analyze_amp_page(url):
+    """Analyze an Accelerated Mobile Page (AMP) for proper implementation and performance."""
+    try:
+        # Fetch the AMP page content
+        response = requests.get(url)
+        response.raise_for_status()
+        amp_content = response.text
+
+        # Check if the page is a valid AMP page
+        if is_valid_amp_page(amp_content):
+            print(f"{url} is a valid AMP page.")
+        else:
+            print(f"{url} is not a valid AMP page.")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error analyzing AMP page: {e}")
+
+def is_valid_amp_page(content):
+    """Check if the page is a valid AMP page using the AMP Validator API."""
+    amp_validator_api_url = 'https://amp.googleapis.com/v1/validate'
+
+    try:
+        response = requests.post(amp_validator_api_url, params={'key': 'YOUR_API_KEY'}, data=content)
+        response.raise_for_status()
+        validation_result = response.json()
+
+        if validation_result['status'] == 'PASS':
+            return True
+        else:
+            print("AMP Validation Errors:")
+            for error in validation_result.get('errors', []):
+                print(f"  - {error['message']}")
+            return False
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error validating AMP page: {e}")
+        return False
+
+if __name__ == "__main__":
+    # Replace 'https://example.com' with the actual URL of the AMP page you want to analyze
+    amp_url_to_analyze = 'https://faizazizan.com'
+
+    analyze_amp_page(amp_url_to_analyze)
