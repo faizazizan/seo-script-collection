@@ -1,0 +1,14 @@
+import pandas as pd
+
+
+df = pd.read_csv("Keyword_Stats.csv")
+
+# Filter the DataFrame to include only rows where "Top of page bid (low range)" has a value
+filtered_df = df[df['Top of page bid (low range)'].notnull()]
+
+# Get the keywords from the filtered DataFrame
+keywords_with_bid = filtered_df['Keyword'].tolist()
+
+# Print the keywords that have a value in the "Top of page bid (low range)" column
+for keyword in keywords_with_bid:
+    print(keyword)
