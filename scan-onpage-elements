@@ -1,0 +1,62 @@
+##analyze on-page elements 
+
+
+from bs4 import BeautifulSoup
+import requests
+
+def get_html(url):
+    """Retrieve HTML content from a given URL."""
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.text
+    except requests.exceptions.HTTPError as errh:
+        print(f"HTTP Error: {errh}")
+    except requests.exceptions.ConnectionError as errc:
+        print(f"Error Connecting: {errc}")
+    except requests.exceptions.Timeout as errt:
+        print(f"Timeout Error: {errt}")
+    except requests.exceptions.RequestException as err:
+        print(f"An error occurred: {err}")
+    return None
+
+def analyze_onpage_seo(html_content, url):
+    """Analyze on-page SEO elements in HTML content."""
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # Extract and analyze title tag
+    title_tag = soup.title.string.strip() if soup.title else None
+    print(f"Title Tag for {url}: {title_tag}")
+
+    # Extract and analyze meta description
+    meta_description = soup.find('meta', {'name': 'description'})
+    meta_description = meta_description['content'].strip() if meta_description else None
+    print(f"Meta Description for {url}: {meta_description}")
+
+    # Extract and analyze header tags (h1 to h6)
+    header_tags = [f"H{i}: {header.text.strip()}" for i in range(1, 7) for header in soup.find_all(f'h{i}')]
+
+    if header_tags:
+        print(f"\nHeader Tags for {url}:")
+        for header_tag in header_tags:
+            print(header_tag)
+    else:
+        print(f"No header tags found for {url}.")
+
+if __name__ == "__main__":
+    # Specify a list of URLs to analyze
+    urls_to_analyze = [
+        "https://faizazizan.com",
+        ##"https://example.com",
+        # Add more URLs as needed
+    ]
+
+    for url in urls_to_analyze:
+        # Get HTML content from the webpage
+        html_content = get_html(url)
+
+        if html_content:
+            # Analyze on-page SEO elements for each URL
+            analyze_onpage_seo(html_content, url)
+        else:
+            print(f"Failed to retrieve HTML content for {url}.")
