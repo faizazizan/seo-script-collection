@@ -1,0 +1,31 @@
+##Google Alert
+
+import feedparser
+
+def monitor_google_alerts(query):
+    """Monitor Google Alerts for a specific query."""
+    google_alerts_rss_url = f"https://www.google.com/alerts/feeds/{query}"
+
+    try:
+        feed = feedparser.parse(google_alerts_rss_url)
+
+        if feed.entries:
+            print(f"Google Alerts mentions for '{query}':")
+            for entry in feed.entries:
+                print(f"Title: {entry.title}")
+                print(f"Link: {entry.link}")
+                print(f"Published: {entry.published}")
+                print("\n")
+
+        else:
+            print(f"No new mentions found for '{query}'.")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    # Replace 'terato' with the query you want to monitor
+    query_to_monitor = 'faiz'
+
+    # Monitor Google Alerts for the specified query
+    monitor_google_alerts(query_to_monitor)
