@@ -1,0 +1,51 @@
+##Backlink Analysis
+
+import requests
+
+def get_ahrefs_backlinks(domain, api_key):
+    base_url = "https://apiv2.ahrefs.com"
+    endpoint = "/v1/backlinks"
+    
+    params = {
+        'target': domain,
+        'mode': 'domain',
+        'limit': 100,  # Adjust the limit as needed
+        'output': 'json',
+        'from': 'ahrefs_rank',  # You can change the sorting criterion
+        'order_by': 'desc',
+    }
+
+    headers = {
+        'Accept': 'application/json',
+        'User-Agent': 'YourApp/1.0',
+    }
+
+    try:
+        response = requests.get(f"{base_url}{endpoint}", params=params, headers=headers, auth=(api_key, ''))
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as errh:
+        print(f"HTTP Error: {errh}")
+    except requests.exceptions.ConnectionError as errc:
+        print(f"Error Connecting: {errc}")
+    except requests.exceptions.Timeout as errt:
+        print(f"Timeout Error: {errt}")
+    except requests.exceptions.RequestException as err:
+        print(f"An error occurred: {err}")
+    return None
+
+if __name__ == "__main__":
+    # Replace 'YOUR_API_KEY' with your Ahrefs API key
+    ahrefs_api_key = 'YOUR_API_KEY'
+    
+    # Specify the domain for backlink analysis
+    domain_to_analyze = 'faizazizan.com'
+    
+    # Fetch and print backlink data
+    backlink_data = get_ahrefs_backlinks(domain_to_analyze, ahrefs_api_key)
+
+    if backlink_data:
+        print("Backlink Data:")
+        print(backlink_data)
+    else:
+        print("Failed to retrieve backlink data.")
