@@ -1,0 +1,65 @@
+## Check SSL expiry
+
+import ssl
+import socket
+import datetime
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def check_ssl_expiry(hostname, port):
+    """Check SSL certificate expiration date."""
+    context = ssl.create_default_context()
+    try:
+        with socket.create_connection((hostname, port)) as sock:
+            with context.wrap_socket(sock, server_hostname=hostname) as ssock:
+                cert = ssock.getpeercert()
+                expire_date = datetime.datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
+                return expire_date
+    except Exception as e:
+        print(f"Error checking SSL expiry: {e}")
+        return None
+
+def send_notification(email_to, email_subject, email_body):
+    """Send email notification."""
+    email_from = 'your_email@gmail.com'  # Replace with your email
+    email_password = 'your_email_password'  # Replace with your email password
+
+    msg = MIMEMultipart()
+    msg['From'] = email_from
+    msg['To'] = email_to
+    msg['Subject'] = email_subject
+
+    body = MIMEText(email_body)
+    msg.attach(body)
+
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(email_from, email_password)
+            server.sendmail(email_from, email_to, msg.as_string())
+        print("Notification email sent successfully.")
+    except Exception as e:
+        print(f"Error sending notification email: {e}")
+
+if __name__ == "__main__":
+    # Replace with the actual domain and port
+    domain_to_check = 'faizazizan.com'
+    port_to_check = 443
+
+    # Replace with the actual email information
+    recipient_email = 'recipient@example.com'
+    email_subject = 'SSL Certificate Expiry Notification'
+
+    expiry_date = check_ssl_expiry(domain_to_check, port_to_check)
+
+    if expiry_date:
+        days_until_expiry = (expiry_date - datetime.datetime.now()).days
+        print(f"The SSL certificate for {domain_to_check} will expire in {days_until_expiry} days.")
+
+        # Set a threshold for notification, e.g., notify when the certificate is about to expire in 30 days
+        if days_until_expiry <= 30:
+            notification_body = f"The SSL certificate for {domain_to_check} will expire in {days_until_expiry} days. Please renew it."
+            send_notification(recipient_email, email_subject, notification_body)
+    else:
+        print("Failed to check SSL certificate expiry.")
