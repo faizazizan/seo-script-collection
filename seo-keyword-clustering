@@ -1,0 +1,63 @@
+# Import required libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+
+# Set up credentials
+creds = Credentials.from_service_account_file('/path/to/credential.json')
+service = build('searchconsole', 'v1', credentials=creds)
+
+# Define search console query
+query = {
+    'startDate': '2022-01-01',
+    'endDate': '2022-02-01',
+    'dimensions': ['query'],
+    'searchType': 'web',
+    'rowLimit': 25000
+}
+
+# Execute search console query
+response = service.searchanalytics().query(
+    siteUrl='https://example.com', body=query).execute()
+
+# Convert response to pandas DataFrame
+df = pd.DataFrame(response['rows'], columns=['query', 'clicks', 'impressions', 'ctr', 'position'])
+df[['clicks', 'impressions', 'position']] = df[['clicks', 'impressions', 'position']].apply(pd.to_numeric)
+
+# Normalize data
+df['clicks_norm'] = np.log(df['clicks'] + 1)
+df['impressions_norm'] = np.log(df['impressions'] + 1)
+
+# Feature engineering
+df['avg_position'] = df['position'] / df['impressions']
+df['avg_ctr'] = df['clicks'] / df['impressions']
+
+# Define features to be used for clustering
+features = ['avg_position', 'avg_ctr', 'impressions_norm']
+
+# Standardize features
+df[features] = (df[features] - df[features].mean()) / df[features].std()
+
+# Determine optimal number of clusters using elbow method
+sse = []
+for k in range(1, 10):
+    kmeans = KMeans(n_clusters=k, random_state=1)
+    kmeans.fit(df[features])
+    sse.append(kmeans.inertia_)
+plt.plot(range(1, 10), sse)
+plt.xticks(range(1, 10))
+plt.xlabel("Number of Clusters")
+plt.ylabel("SSE")
+plt.show()
+
+# Cluster data
+kmeans = KMeans(n_clusters=3, random_state=1)
+df['cluster'] = kmeans.fit_predict(df[features])
+
+# Visualize clusters
+sns.scatterplot(x='avg_position', y='avg_ctr', data=df, hue='cluster')
+plt.show()
