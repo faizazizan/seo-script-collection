@@ -1,0 +1,30 @@
+##Keyword Suggestion
+
+import requests
+import json
+
+def get_suggestions(keyword, num_suggestions=10):
+    url = "https://suggestqueries.google.com/complete/search"
+    params = {
+        "client": "firefox",
+        "q": keyword,
+        "hl": "ms",
+        "gl": "my",
+        "ie": "UTF-8",
+        "oe": "UTF-8",
+        "num": num_suggestions
+    }
+    response = requests.get(url, params=params)
+    suggestions = json.loads(response.content.decode("utf-8"))[1]
+    related_keywords = [d.get("google:suggestrelevance", "") for d in json.loads(response.content.decode("utf-8"))[2]]
+    return suggestions, related_keywords
+
+# Example usage
+keyword = "terato tech"
+num_suggestions = 100
+suggestions, related_keywords = get_suggestions(keyword, num_suggestions)
+print("Suggestions for keyword '{}':".format(keyword))
+print(suggestions)
+print("Related keywords:")
+print(related_keywords)
+
