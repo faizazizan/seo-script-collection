@@ -1,0 +1,46 @@
+##Check Robot.txt
+
+import requests
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
+
+def analyze_robots_txt(url):
+    """Analyze the robots.txt file to ensure that important pages are not blocked."""
+    try:
+        robots_txt_url = urljoin(url, '/robots.txt')
+        response = requests.get(robots_txt_url)
+        response.raise_for_status()
+        robots_content = response.text
+
+        disallowed_paths = get_disallowed_paths(robots_content)
+
+        if not disallowed_paths:
+            print(f"All pages are allowed by robots.txt on {url}.")
+        else:
+            print("Disallowed Paths in robots.txt:")
+            for path in disallowed_paths:
+                print(f"  - {path}")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error analyzing robots.txt: {e}")
+
+def get_disallowed_paths(robots_content):
+    """Extract disallowed paths from the robots.txt content."""
+    disallowed_paths = []
+
+    # Use BeautifulSoup to parse robots.txt content
+    soup = BeautifulSoup(robots_content, 'html.parser')
+    user_agents = soup.find_all('user-agent')
+
+    for user_agent in user_agents:
+        if user_agent.text.strip() == '*' or user_agent.text.strip() == 'all':
+            disallow_tags = user_agent.find_all('disallow')
+            disallowed_paths.extend(tag.text.strip() for tag in disallow_tags)
+
+    return disallowed_paths
+
+if __name__ == "__main__":
+    # Replace 'https://example.com' with the actual URL of the website you want to analyze
+    website_url_to_analyze = 'https://semuanyabola.com'
+
+    analyze_robots_txt(website_url_to_analyze)
